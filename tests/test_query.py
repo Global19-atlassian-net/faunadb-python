@@ -3,7 +3,7 @@ from datetime import date, datetime
 from time import sleep
 
 from faunadb.errors import BadRequest, NotFound
-from faunadb.objects import FaunaTime, Ref, SetRef, _Expr, Native
+from faunadb.objects import FaunaTime, Ref, SetRef, _Expr, Native, Query
 from faunadb import query
 from tests.helpers import FaunaTestCase
 
@@ -59,6 +59,14 @@ class QueryTest(FaunaTestCase):
 
   def test_abort(self):
     self._assert_bad_query(query.abort("aborting"))
+
+  def test_query(self):
+    body = self._q(query.query(lambda a, b: query.concat([a, b], "/")))
+    bodyEchoed = self._q(body)
+
+    self.assertEqual(body, bodyEchoed)
+    self.assertEqual(body, Query({"api_version": "3", "lambda": ["a", "b"], "expr": {"concat": [{"var": "a"}, {"var": "b"}], "separator": "/"}}))
+
 
   def test_at(self):
     document = self._create(n=1)
